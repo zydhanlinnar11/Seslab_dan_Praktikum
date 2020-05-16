@@ -13,7 +13,6 @@ void etude() {
     for(int i=30; a > 0; i--) {
         compute[i] = (a % 2);
         a >>= 1;
-        // cout<<compute[i];
         if(i == 30)
             p1 += compute[i];
         else if(i == 29)
@@ -24,7 +23,6 @@ void etude() {
             p8 += compute[i];
         else if(i == 26)
             p16 += compute[i];
-        // cout<<(30 - i)<<" : "<<compute[i]<<'\n';
         if(i <= 25) {
             if((pos1[bit] & 1) == 1)
                 p1 += compute[i];
@@ -36,12 +34,10 @@ void etude() {
                 p8 += compute[i];
             if((pos1[bit] & 16) == 16)
                 p16 += compute[i];
-            // cout<<"Bit ke-"<<pos1[bit]<<'\n';
             bilangan += compute[i] * power[bit];
             bit++;
         }
     }
-    // cout<<'\n';
     if((p1 % 2) != 0)
         bitsalah += 1;
     if((p2 % 2) != 0)
@@ -52,11 +48,8 @@ void etude() {
         bitsalah += 8;
     if((p16 % 2) != 0)
         bitsalah += 16;
-    // printf("p1 = %d, p2 = %d, p4 = %d, p8 = %d, p16 = %d\n", p1, p2, p4, p8, p16);
-    // cout<<"bitsalah "<<bitsalah<<'\n';
     if(bitsalah > 2 && bitsalah != 4 && bitsalah != 8 && bitsalah != 16) {
         int bitindex = 26 - pos2[bitsalah - 1], bitke = 25 - bitindex;
-        // printf("Bit yang salah %d, 2^%d\n", bitsalah, )
         bilangan -= compute[bitindex] * power[bitke];
         bilangan += (!compute[bitindex]) * power[bitke];
     }
@@ -71,7 +64,6 @@ int main() {
     power[0] = 1;
     for(int i=1; i<32; i++) {
         power[i] = power[i - 1] * 2;
-        // printf("2^%d = %d\n", i, power[i]);
     }
     cin>>t;
     while(t--)

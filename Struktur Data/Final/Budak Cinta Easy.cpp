@@ -1,76 +1,52 @@
-#include <bits/stdc++.h> 
-using namespace std; 
-const int N = 100000;
+#include <bits/stdc++.h>
+using namespace std;
 typedef long long ll;
-typedef pair<ll, int> pli;
-int n;
-vector<pli> *graph; 
-set<int> *cycles; 
-
-void dfs_cycle(int u, int p, int color[], int mark[], int par[], int& cyclenumber) { 
-	if (color[u] == 2) { 
-		return; 
-	} 
-
-	if (color[u] == 1) {
-		cyclenumber++; 
-		int cur = p; 
-		mark[cur] = cyclenumber; 
-
-		while (cur != u) { 
-			cur = par[cur]; 
-			mark[cur] = cyclenumber; 
-		} 
-		return; 
-	} 
-	par[u] = p; 
-	color[u] = 1; 
-
-	for (pli v : graph[u]) { 
-		if (v.second == par[u]) { 
-			continue; 
-		} 
-		dfs_cycle(v.second, u, color, mark, par, cyclenumber); 
-	} 
-	color[u] = 2; 
-} 
-
-void addEdge(int u, int v, ll w) { 
-	graph[u].push_back(make_pair(w, v)); 
-	graph[v].push_back(make_pair(w, u)); 
+typedef pair<ll, ll> pll;
+#define mpair make_pair
+vector<pll> *adjList;
+set<pll> crucialPipe;
+ll n, m;
+bool isCrucialPipe(ll a, ll b) {
+    return ((crucialPipe.find(mpair(a, b)) != crucialPipe.end())
+    || (crucialPipe.find(mpair(b, a)) != crucialPipe.end()));
 }
-bool **sudah, **jawab;
-bool seprov(int a, int b, int cyclenum) {
-    if(sudah[a][b])
-        return jawab[a][b];
-    for(int i=1; i<=cyclenum; i++) {
-        if((cycles[i].find(a) != cycles[i].end() ) && (cycles[i].find(b) != cycles[i].end())) {
-            sudah[a][b] = true;
-            jawab[a][b] = true;
-            return true;
+
+ll bfs(pair<ll, ll> removed) {
+    ll u = removed.first, v = removed.second, pool = 0;
+    vector<bool> sudah(n, false);
+    queue<ll> node;
+    node.push(v);
+    sudah[v] = true;
+    while(!node.empty()) {
+        ll curr = node.front();
+        node.pop();
+        pool++;
+        for(auto i=adjList[curr].begin(); i != adjList[curr].end(); i++) {
+            if(!sudah[(*i).second] && (curr != v || (*i).second != u) && (curr != u || (*i).second != v)) {
+                sudah[(*i).second] = true;
+                node.push((*i).second);
+            }
         }
     }
-    sudah[a][b] = true;
-    jawab[a][b] = false;
-    return false;
+    return pool;
 }
-ll **dist;
 
-void dijkstra(int s, int n, int cyclenum) {
-    priority_queue <pli, vector <pli>, greater <pli>> pq;
-    set<int> seen;
-    memset(dist[s], -1, sizeof(ll) * (n + 1));
+ll **dist;
+void dijkstra(ll s) {
+    priority_queue <pll, vector <pll>, greater <pll>> pq;
+    set<ll> seen;
+    memset(dist[s], -1, sizeof(ll) * n);
     dist[s][s] = 0;
     pq.push({0, s});
     while(!pq.empty()) {
-        pli now = pq.top();
+        pll now = pq.top();
         pq.pop();
         if(seen.find(now.second) != seen.end()) continue;
         seen.insert(now.second);
-        for(int i = 0; i < graph[now.second].size(); i++) {
-            int next = graph[now.second][i].second;
-            int cost = graph[now.second][i].first;
-            if(seprov(now.second, next, cyclenum))
+        for(ll i = 0; i < adjList[now.second].size(); i++) {
+            ll next = adjList[now.second][i].second;
+            ll cost = adjList[now.second][i].first;
+            if(!isCrucialPipe(now.second, next))
                 cost = 0;
 
             if(now.first + cost < dist[s][next] || dist[s][next] == -1) {
@@ -85,41 +61,36 @@ void dijkstra(int s, int n, int cyclenum) {
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
-	int edges;
-    cin>>n>>edges;
-    sudah = new bool*[n + 1];
-    jawab = new bool*[n + 1];
-    dist = new ll*[n + 1];
-    for(int i=0; i<=n; i++) {
-        sudah[i] = new bool[n + 1], jawab[i] = new bool[n + 1];
-        dist[i] = new ll[n + 1];
-        memset(sudah[i], 0, (n + 1) * sizeof(bool));
-    }
-    graph = new vector<pli>[N + 1];
-    cycles = new set<int>[N + 1];
-    for(int i=0; i<edges; i++){
-        int u, v;
-        ll w;
+    cin>>n>>m;
+    vector<pll> edgeList;
+    adjList = new vector<pll>[n];
+    edgeList.resize(m);
+    for(ll i=0; i<m; i++) {
+        ll u, v, w;
         cin>>u>>v>>w;
-        addEdge(u, v, w);
+        u--, v--;
+        adjList[u].push_back(mpair(w, v));
+        adjList[v].push_back(mpair(w, u));
+        edgeList[i] = mpair(u, v);
     }
-	int color[N + 1]; 
-	int par[N + 1]; 
-	int mark[N + 1]; 
-	int cyclenumber = 0; 
-	dfs_cycle(1, 0, color, mark, par, cyclenumber); 
-	for (int i = 1; i <= edges; i++) { 
-		if (mark[i] != 0) 
-			cycles[mark[i]].insert(i); 
-	} 
-    for(int i=1; i<=n; i++) {
-        dijkstra(i, n, cyclenumber);
+
+    for(ll i=0; i<m; i++) {
+        ll u = edgeList[i].first, v = edgeList[i].second;
+        ll pool = bfs(edgeList[i]);
+        if(pool != n) {
+            crucialPipe.insert(mpair(min(u, v), max(u, v)));
+        }
     }
-    int q;
+    dist = new ll*[n];
+    for(ll i=0; i<n; i++)
+        dist[i] = new ll[n];
+    for(ll i=0; i<n; i++)
+        dijkstra(i);
+    ll q;
     cin>>q;
     while(q--) {
-        int x, y;
+        ll x, y;
         cin>>x>>y;
-        cout<<dist[x][y]<<'\n';
+        cout<<dist[--x][--y]<<'\n';
     }
-} 
+}

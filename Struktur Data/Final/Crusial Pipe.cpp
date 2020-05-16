@@ -42,8 +42,6 @@ ll bfs(pair<ll, ll> removed) {
         for(auto i=adjList[curr].begin(); i != adjList[curr].end(); i++) {
             if(!sudah[*i] && (curr != v || (*i) != u) && (curr != u || (*i) != v)) {
                 sudah[*i] = true;
-                // if(removed.first == 2 && removed.second == 1)
-                    // printf("start %lld, %lld mengunjungi %lld\n", v, curr, *i);
                 node.push(*i);
             }
         }

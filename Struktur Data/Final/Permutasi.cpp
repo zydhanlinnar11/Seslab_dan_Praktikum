@@ -30,7 +30,6 @@ int main() {
     for(ll i = 0; i < n; i++) {
         ll pi = sorted.order_of_key(p[i]);
         ll d = davl.order_of_key(pi);
-        // cout<<d<<' ';
         davl.erase(pi);
         sum = ((sum % mod) + ((d % mod) * (fact[tmp--] % mod) % mod) % mod);
     }

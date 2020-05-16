@@ -42,7 +42,6 @@ int main() {
         cout<<"Client "<<i<<":\n";
         for(auto j=pq.begin(); j != pq.end(); j++)
             cout<<(*j).second<<'\n';
-        // printf("Koneksi client %d = %d\n", i, sambungan.size());
         koneksi += sambungan.size();
     }
     cout<<"Total Koneksi: "<<koneksi<<'\n';
